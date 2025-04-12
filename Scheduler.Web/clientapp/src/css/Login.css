@@ -1,0 +1,35 @@
+﻿.login-container {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+form div {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+form label {
+    width: 80px;
+    text-align: right;
+}
+
+form input {
+    width: 200px;
+    padding: 5px;
+}
+
+.error {
+    color: red;
+    margin-bottom: 10px;
+}

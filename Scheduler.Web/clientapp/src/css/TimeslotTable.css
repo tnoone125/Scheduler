@@ -1,0 +1,24 @@
+﻿body p {
+    text-align: start;
+}
+
+table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+
+td, th {
+    width: 110px;
+    height: 50px;
+    text-align: center;
+    border: 1px solid black;
+}
+
+th {
+    background-color: lightgrey;
+}
+
+td.filled {
+    background-color: green;
+}

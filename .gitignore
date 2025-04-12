@@ -35,3 +35,6 @@
 
 # Ignore Publish files
 **/Properties/ServiceDependencies/*
+
+# Ignore .NET Migrations
+**/Migrations/*
