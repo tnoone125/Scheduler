@@ -1,2 +1,0 @@
-C:\Users\thoma\OneDrive\Documents\CISC 6957\CourseScheduler\CourseScheduler.Web\coursescheduler.web.client\obj\Debug\coursescheduler.web.client.esproj.CoreCompileInputs.cache
-C:\Users\thoma\OneDrive\Documents\CISC 6957\Scheduler\Scheduler.Web\clientapp\obj\Debug\coursescheduler.web.client.esproj.CoreCompileInputs.cache
