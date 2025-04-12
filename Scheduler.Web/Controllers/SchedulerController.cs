@@ -46,12 +46,20 @@ namespace Scheduler.Web.Server.Controllers
 
             var expressionIndexToExpressionId = await this._repository.InsertExpressionsAsync(expressions);
             var courseEventLogs = await this._repository.InsertCoursesAsync(data.Courses, expressionIndexToExpressionId);
+            _logger.Log(LogLevel.Information, "About to run scheduler");
+            try
+            {
+                await this._repository.InsertEventLogsAsync(instructorEventLogs.Concat(roomsEventLogs).ToList().Concat(courseEventLogs));
+                var schedulerResult = this.solver.Solve(data.Instructors, expressions, data.Rooms, courseSections);
+                await this._repository.InsertCompletedScheduleRunAsync(schedulerResult.Results.Count > 0, schedulerResult.Message ?? "");
 
-            await this._repository.InsertEventLogsAsync(instructorEventLogs.Concat(roomsEventLogs).ToList().Concat(courseEventLogs));
-            var schedulerResult = this.solver.Solve(data.Instructors, expressions, data.Rooms, courseSections);
-            await this._repository.InsertCompletedScheduleRunAsync(schedulerResult.Results.Count > 0, schedulerResult.Message ?? "");
-            
-            return new JsonResult(schedulerResult);
+                return new JsonResult(schedulerResult);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return StatusCode(500);
+            }
         }
 
         private List<Models.Expression> CreateExpressionsFromJsonInput(JsonInput input)

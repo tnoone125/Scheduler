@@ -1,0 +1,37 @@
+# Ignore build results
+**/bin/*
+**/obj/*
+
+# Ignore Visual Studio files
+**/.vs/*
+**/.vscode/*
+
+# Ignore npm / yarn packages
+**/node_modules/*
+
+# Ignore ASP.NET Core files
+**/wwwroot/*
+**/appsettings.Development.json
+**/appsettings.json
+**/Properties/PublishProfiles/*
+**/*.user
+**/*.suo
+
+# Ignore React build output
+**/build/*
+**/dist/*
+
+# Ignore Rider and VS Code
+.idea/*
+
+# Ignore environment-specific settings
+**/.env
+**/.env.local
+**/.env.development
+
+# Ignore local db files
+**/*.mdf
+**/*.ldf
+
+# Ignore Publish files
+**/Properties/ServiceDependencies/*

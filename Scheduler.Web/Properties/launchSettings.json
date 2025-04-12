@@ -13,7 +13,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "YourProjectName": {
+    "Scheduler": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
