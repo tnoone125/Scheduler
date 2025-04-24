@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Models = Scheduler.Web.Models;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Scheduler.Web.SchedulingCalc;
 using Scheduler.Web.DataPersistence;
 
@@ -20,8 +20,24 @@ namespace Scheduler.Web.Server.Controllers
             _repository = repository;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetPageData(int page = 1, int pageSize = 15)
+        [Authorize]
+        [HttpGet("getLoggedInUsers")]
+        public async Task<IActionResult> GetLoggedInUsers()
+        {
+            try
+            {
+                var userData = await _repository.GetSignedInUsersAsync();
+                return Ok(new { userData });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Authorize]
+        [HttpGet("getPageData")]
+        public async Task<IActionResult> GetPageData(int page = 1, int pageSize = 20)
         {
             try
             {
@@ -35,7 +51,8 @@ namespace Scheduler.Web.Server.Controllers
             }
         }
 
-        [HttpPost]
+        [Authorize]
+        [HttpPost("submitSettings")]
         public async Task<IActionResult> SubmitSettings([FromBody] JsonInput data)
         {
             var instructorEventLogs = await this._repository.UpsertInstructorsAsync(data.Instructors);

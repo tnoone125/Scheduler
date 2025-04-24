@@ -2,28 +2,35 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using Scheduler.Web.DataPersistence;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace YourNamespace.Controllers
+namespace Scheduler.Web.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
+        private readonly ILogger<AuthController> _logger;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly IConfiguration _configuration;
+        private readonly SchedulerRepository _repository;
 
         public AuthController(
-            UserManager<IdentityUser> userManager,
+            ILogger<AuthController> logger,
+        UserManager<IdentityUser> userManager,
             SignInManager<IdentityUser> signInManager,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            SchedulerRepository repository)
         {
+            _logger = logger;
             _userManager = userManager;
             _signInManager = signInManager;
             _configuration = configuration;
+            _repository = repository;
         }
 
         /// <summary>
@@ -63,9 +70,16 @@ namespace YourNamespace.Controllers
 
             var user = await _userManager.FindByNameAsync(model.Username);
             if (user == null || !await _userManager.CheckPasswordAsync(user, model.Password))
+            {
+                if (user != null && user.UserName != null)
+                {
+                    await _repository.InsertUserLoginAsync(user.UserName, false, false);
+                }
                 return Unauthorized(new { message = "Invalid credentials" });
+            }
 
             var token = GenerateJwtToken(user);
+            await _repository.InsertUserLoginAsync(user.UserName, true, false);
             return Ok(new { token });
         }
 
@@ -75,9 +89,13 @@ namespace YourNamespace.Controllers
         /// <returns>Success response.</returns>
         [Authorize]
         [HttpPost("logout")]
-        public IActionResult Logout()
+        public async Task<IActionResult> Logout()
         {
-            // Optionally, implement token invalidation or blacklist here.
+            var username = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!string.IsNullOrEmpty(username))
+            {
+                await _repository.InsertUserLoginAsync(username, false, true);
+            }
             return Ok(new { message = "Logged out successfully" });
         }
 
@@ -95,7 +113,7 @@ namespace YourNamespace.Controllers
                 new Claim(ClaimTypes.NameIdentifier, user.Id)
             };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWTKey"]));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(

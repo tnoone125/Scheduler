@@ -185,6 +185,59 @@ namespace Scheduler.Web.DataPersistence
             await _context.Database.ExecuteSqlRawAsync(query, parameters);
         }
 
+        public async Task InsertUserLoginAsync(string userName, bool loginSuccessful, bool isLogout)
+        {
+            var query = $@"
+                INSERT INTO schdl.eventLogs (action, target, detail)
+                VALUES
+                (@action, @target, @detail)";
+            var action = isLogout ? "LOGOUT" : "LOGIN";
+            var target = userName;
+            var success = isLogout || loginSuccessful ? "true" : "false";
+            var details = $"{{ \"success\": {success} }}";
+
+            var parameters = new SqlParameter[]
+            {
+                new SqlParameter("@action", action),
+                new SqlParameter("@target", target),
+                new SqlParameter("@detail", details)
+            };
+            await _context.Database.ExecuteSqlRawAsync(query, parameters);
+        }
+
+        public async Task<List<LoginEvent>> GetSignedInUsersAsync()
+        {
+            var query = $@"
+                WITH RecentLoginEvents AS (
+                    SELECT
+                        target AS username,
+                        MAX(timestamp) AS lastLogin
+                    FROM schdl.eventLogs
+                    WHERE action = 'LOGIN'
+                        AND timestamp >= DATEADD(MINUTE, -30, GETDATE())
+                    GROUP BY target
+                ),
+                RecentLogoutEvents AS (
+                    SELECT
+                        target AS username,
+                        MAX(timestamp) AS lastLogout
+                    FROM schdl.eventLogs
+                    WHERE action = 'LOGOUT'
+                        AND timestamp >= DATEADD(MINUTE, -30, GETDATE())
+                    GROUP BY target
+                )
+                SELECT
+                    rle.username,
+                    rle.lastLogin
+                FROM RecentLoginEvents rle
+                LEFT JOIN RecentLogoutEvents rlo
+                    ON rle.username = rlo.username
+                    AND rlo.lastLogout > rle.lastLogin
+                WHERE rlo.username IS NULL;";
+
+            return await _context.Database.SqlQueryRaw<LoginEvent>(query).ToListAsync();
+        }
+
         public async Task<List<EventLog>> InsertCoursesAsync(List<Models.Course> courses, ConcurrentDictionary<int, int> expressionIndexToExpressionId)
         {
             var eventLogs = new List<EventLog>();

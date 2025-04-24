@@ -1,10 +1,11 @@
 ﻿import { Navigate } from "react-router-dom";
+import { getIsExpired } from '../../util/token.js';
 
 export default function ProtectedRoute({ children }) {
-    const token = localStorage.getItem("jwt");
+    const token = localStorage.getItem("jwtScheduler");
 
-    if (!token) {
-        return <Navigate to="/" replace />;
+    if (!token || getIsExpired(token)) {
+        return <Navigate to="/login" replace />;
     }
 
     return children;

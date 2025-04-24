@@ -23,7 +23,7 @@ export default function CourseForm() {
         setIsLoading(true);
         console.log(JSON.stringify({ instructors: teachers, rooms: rooms, courses: courses, timeslots: timeslots }));
         try {
-            const response = await fetch('/api/scheduler', {
+            const response = await fetch('/api/scheduler/submitSettings', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
