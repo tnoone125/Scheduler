@@ -93,3 +93,25 @@ th, td {
     margin-top: 5px;
     margin-bottom: 5px;
 }
+
+.custom-tooltip {
+    visibility: hidden;
+    width: 160px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    padding: 5px;
+    border-radius: 6px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%; /* Position it above the icon */
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+div:hover .custom-tooltip {
+    visibility: visible;
+    opacity: 1;
+}

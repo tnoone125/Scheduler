@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Scheduler.Web.SchedulingCalc;
 using Scheduler.Web.DataPersistence;
+using System.Security.Claims;
 
 namespace Scheduler.Web.Server.Controllers
 {
@@ -24,6 +25,11 @@ namespace Scheduler.Web.Server.Controllers
         [HttpGet("getLoggedInUsers")]
         public async Task<IActionResult> GetLoggedInUsers()
         {
+            var username = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(username) || !username.Equals("admin"))
+            {
+                return BadRequest("Only admin may access this endpoint.");
+            }
             try
             {
                 var userData = await _repository.GetSignedInUsersAsync();
@@ -39,6 +45,11 @@ namespace Scheduler.Web.Server.Controllers
         [HttpGet("getPageData")]
         public async Task<IActionResult> GetPageData(int page = 1, int pageSize = 20)
         {
+            var username = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(username) || !username.Equals("admin"))
+            {
+                return BadRequest("Only admin may access this endpoint.");
+            }
             try
             {
                 var logData = await this._repository.FetchEventLogPageAsync(page, pageSize);

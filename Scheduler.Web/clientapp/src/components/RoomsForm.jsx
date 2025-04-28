@@ -6,7 +6,10 @@ import { MultiSelect } from 'primereact/multiselect';
 import { InputText } from 'primereact/inputtext';
 import { InputNumber } from 'primereact/inputnumber';
 import { X } from 'lucide-react';
+import { Tooltip } from 'primereact/tooltip';
 import '../css/App.css';
+import "primereact/resources/primereact.min.css";
+import "primeicons/primeicons.css";
 
 export default function RoomInputForm() {
     const { rooms, teachers, setRooms, currentStep, setCurrentStep } = useContext(AppContext);
@@ -78,6 +81,10 @@ export default function RoomInputForm() {
                             className="w-full md:w-20rem" />
                         <span style={hoverXIndex === index ? { cursor: "pointer" } : { cursor: "auto" }} onMouseEnter={() => setHoverXIndex(index)} onMouseLeave={() => setHoverXIndex(null)}>
                             <X size={20} color={hoverXIndex === index ? "red" : "black"} onClick={() => removeRoom(index)} />
+                        </span>
+                        <span>
+                            <Tooltip target=".info-icon" content="The scheduler will try to only assign courses within particular departments to this room, but it may not always be able to." position="top" />
+                            <i className="pi pi-info-circle info-icon" style={{ fontSize: '1.5rem', cursor: 'pointer' }} />
                         </span>
                     </div>
                 ))}
