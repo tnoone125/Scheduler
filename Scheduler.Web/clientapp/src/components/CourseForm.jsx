@@ -21,12 +21,20 @@ export default function CourseForm() {
 
     const submitForm = async () => {
         setIsLoading(true);
+        const token = localStorage.getItem("jwtScheduler");
+
+        if (!token) {
+            console.log("No token found. Redirecting to login...");
+            navigate("/login");
+            return;
+        }
         console.log(JSON.stringify({ instructors: teachers, rooms: rooms, courses: courses, timeslots: timeslots }));
         try {
             const response = await fetch('/api/scheduler/submitSettings', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({ instructors: teachers, rooms: rooms, courses: courses, timeslots: timeslots })
             });

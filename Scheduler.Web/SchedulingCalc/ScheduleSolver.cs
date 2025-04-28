@@ -152,6 +152,26 @@ namespace Scheduler.Web.SchedulingCalc
                 }
             }
 
+            // Objective Function: Penalize when a room is assigned to a department that is not in
+            // the preferred list.
+            LinearExpr obj = LinearExpr.Constant(0);
+            for (int r = 0; r < rooms.Count(); r++)
+            {
+                var room = rooms[r];
+
+                for (int c = 0; c < courses.Count(); c++)
+                {
+                    if (!room.PermittedDepartments.Contains(courses[c].Department))
+                    {
+                        obj += assignments.Where(kv => kv.Key.r == r && kv.Key.c == c)
+                            .Select(kv => (LinearExpr)kv.Value)
+                            .Aggregate(LinearExpr.Constant(0), (acc, v) => acc + 3 * v);
+                    }
+                }
+            }
+
+            model.Minimize(obj);
+
             // Create the solver and solve
             CpSolver solver = new CpSolver();
             CpSolverStatus status = solver.Solve(model);

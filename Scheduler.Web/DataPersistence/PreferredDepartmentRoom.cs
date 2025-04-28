@@ -6,13 +6,14 @@ namespace Scheduler.Web.DataPersistence
     [Table("preferredDepartmentRooms", Schema = "schdl")]
     public class PreferredDepartmentRoom
     {
-        [Key, Column(Order = 0)]
+        [Key]
         public int RoomId { get; set; }
+
+        [Key]
+        [StringLength(55)]
+        public string Department { get; set; }
 
         [ForeignKey("RoomId")]
         public Room Room { get; set; }
-
-        [StringLength(55)]
-        public string Department { get; set; }
     }
 }

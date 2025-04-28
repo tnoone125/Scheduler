@@ -357,21 +357,16 @@ namespace Scheduler.Web.DataPersistence
         // Upsert PreferredDepartments for a specific Room ID
         private async Task UpsertPreferredDepartmentsAsync(int roomId, IEnumerable<PreferredDepartmentRoom> departments)
         {
+            // Delete all old preferred departments for this room
+            var oldDepts = _context.PreferredDepartmentRooms.Where(d => d.RoomId == roomId);
+            _context.PreferredDepartmentRooms.RemoveRange(oldDepts);
+            await _context.SaveChangesAsync();
+
+            // Add new ones
             foreach (var dept in departments)
             {
                 dept.RoomId = roomId;
-
-                var existingDept = await _context.PreferredDepartmentRooms
-                    .FirstOrDefaultAsync(d => d.Department == dept.Department);
-
-                if (existingDept == null)
-                {
-                    _context.PreferredDepartmentRooms.Add(dept);
-                }
-                else
-                {
-                    _context.Entry(existingDept).CurrentValues.SetValues(dept);
-                }
+                _context.PreferredDepartmentRooms.Add(dept);
             }
 
             await _context.SaveChangesAsync();
