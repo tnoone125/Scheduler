@@ -228,7 +228,7 @@ namespace Scheduler.Web.DataPersistence
                 )
                 SELECT
                     rle.username,
-                    rle.lastLogin
+                    FORMAT(rle.lastLogin, 'MMMM d, yyyy h:mm:ss.fff tt') AS lastLogin
                 FROM RecentLoginEvents rle
                 LEFT JOIN RecentLogoutEvents rlo
                     ON rle.username = rlo.username
@@ -276,22 +276,30 @@ namespace Scheduler.Web.DataPersistence
             return eventLogs;
         }
 
-        public async Task<List<EventLog>> FetchEventLogPageAsync(int page = 1, int pageSize = 15)
+        public async Task<List<EventLogModel>> FetchEventLogPageAsync(int page, int pageSize)
         {
             var offset = (page - 1) * pageSize;
             var query = $@"
-                SELECT timestamp, action, target, name, detail
-                FROM schdl.eventLogs
-                ORDER BY timestamp DESC
-                OFFSET @offset ROWS
-                FETCH NEXT @pageSize ROWS ONLY";
+                SELECT FORMAT(t.timestamp, 'MMMM d, yyyy h:mm:ss.fff tt') AS timestamp, 
+                       t.action, 
+                       t.target, 
+                       t.name, 
+                       t.detail
+                FROM (
+                    SELECT timestamp, action, target, name, detail
+                    FROM schdl.eventLogs
+                    ORDER BY timestamp DESC
+                    OFFSET @offset ROWS
+                    FETCH NEXT @pageSize ROWS ONLY
+                ) AS t
+                ORDER BY t.timestamp DESC;";
             var parameters = new SqlParameter[]
             {
                 new SqlParameter("@offset", offset),
                 new SqlParameter("@pageSize", pageSize)
             };
 
-            return await _context.Database.SqlQueryRaw<EventLog>(query, parameters).ToListAsync();
+            return await _context.Database.SqlQueryRaw<EventLogModel>(query, parameters).ToListAsync();
         }
 
         public async Task InsertEventLogsAsync(IEnumerable<EventLog> logs)

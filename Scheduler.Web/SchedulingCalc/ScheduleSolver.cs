@@ -170,6 +170,20 @@ namespace Scheduler.Web.SchedulingCalc
                 }
             }
 
+            // Penalize when a course is not assigned to an expression in its preferred list.
+            for (int e = 0; e < expressions.Count(); e++)
+            {
+                for (int c = 0; c < courses.Count(); c++)
+                {
+                    if (!courses[c].PreferredTimeslots.Contains(e + 1))
+                    {
+                        obj += assignments.Where(kv => kv.Key.c == c && kv.Key.e == e)
+                            .Select(kv => (LinearExpr)kv.Value)
+                            .Aggregate(LinearExpr.Constant(0), (acc, v) => acc + 2 * v);
+                    }
+                }
+            }
+
             model.Minimize(obj);
 
             // Create the solver and solve
