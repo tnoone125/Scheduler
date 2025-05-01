@@ -1,4 +1,5 @@
 ﻿import { useState, useContext } from "react";
+import { Link } from "react-router-dom";
 import { AppContext } from "../context/AppContext";
 import { Dropdown } from "primereact/dropdown";
 import jsPDF from 'jspdf';
@@ -26,7 +27,7 @@ const Schedule = () => {
     const TOTAL_MINUTES = 60 * (17 - 8);
 
     const { scheduleResults } = useContext(AppContext);
-    const [viewRoom, setViewRoom] = useState(true);
+    const [viewRoom, setViewRoom] = useState(false);
     const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
     const teacherNames = [...new Set(scheduleResults.map(item => item.instructor.name))];
@@ -38,6 +39,21 @@ const Schedule = () => {
     const filteredData = scheduleResults.filter((item) =>
         viewRoom ? item.room.name === selectedRoom : item.instructor.name === selectedInstructor
     );
+
+    const handleExportJson = () => {
+        const json = JSON.stringify(filteredData, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+
+        const fileName = `schedule-${viewRoom ? selectedRoom : selectedInstructor}.json`
+
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        link.click();
+
+        URL.revokeObjectURL(url);
+    };
 
     const getPositionAndHeight = (start, end) => {
         const startTime = parseInt(start.split(":"), 10) * 60 + parseInt(start.split(":")[1], 10);
@@ -66,7 +82,8 @@ const Schedule = () => {
 
     return (
         <div>
-            <div>
+            <div className="schedule-settings">
+                <Link to={"/"}>Return to Settings</Link>
                 <button onClick={() => setViewRoom(!viewRoom)}>
                     View by {viewRoom ? "Instructor" : "Room"}
                 </button>
@@ -82,6 +99,7 @@ const Schedule = () => {
                     options={viewRoom ? roomNames : teacherNames}
                 />
                 <button onClick={exportToPDF}>Export to PDF</button>
+                <button onClick={handleExportJson}>Export to JSON</button>
             </div>
 
             <div id={`schedule-${viewRoom ? selectedRoom : selectedInstructor}`}>

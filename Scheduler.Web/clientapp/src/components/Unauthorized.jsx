@@ -1,8 +1,7 @@
 ﻿import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 export default function Unauthorized() {
-    const navigate = useNavigate();
     return (
         <div>
             <h1>Unauthorized</h1>
